@@ -6,7 +6,7 @@ const ShowTask = () => {
 
     const fetchTasks = async () => {
         const res = await fetch(url);
-        const myData = await res.json();
+        const myData = await res.json(); 
         setTasks(myData.data.tasks);
     }
 
