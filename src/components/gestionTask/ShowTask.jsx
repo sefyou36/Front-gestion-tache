@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import de useNavigate
 
 const ShowTask = () => {
     const [tasks, setTasks] = useState([]);
+    const navigate = useNavigate(); // Utilisation de useNavigate
     const url = 'http://localhost:4200/api/v1/taskController';
 
     const fetchTasks = async () => {
@@ -22,7 +24,11 @@ const ShowTask = () => {
 			},
         });
 
+        // Mettre à jour l'état après la suppression de la tâche
         setTasks(tasks.filter(task => task._id !== id));
+
+        // Navigation vers une autre route après la suppression de la tâche
+        navigate('/'); // Par exemple, retour à la page d'accueil
     }
 
     return (

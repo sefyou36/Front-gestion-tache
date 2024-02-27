@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn"));
+  
 
   const handleLogout = () => {
+    // Déconnexion de l'utilisateur
     localStorage.removeItem("isLoggedIn");
-    // Recharger la page pour mettre à jour l'affichage
-    window.location.reload();
+    // Mettre à jour l'état pour refléter la déconnexion
+    setIsLoggedIn(false);
   };
 
   return (
