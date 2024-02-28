@@ -1,16 +1,10 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../auth/AuthProvider";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn"));
-  
+   const { isLoggedIn, logout } = useContext(AuthContext);
 
-  const handleLogout = () => {
-    // Déconnexion de l'utilisateur
-    localStorage.removeItem("isLoggedIn");
-    // Mettre à jour l'état pour refléter la déconnexion
-    setIsLoggedIn(false);
-  };
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -21,7 +15,7 @@ const Navbar = () => {
         </Link>
         <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
           {isLoggedIn ? (
-            <button onClick={handleLogout} className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Logout</button>
+            <button onClick={logout} className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Logout</button>
           ) : (
             <>
               <button>

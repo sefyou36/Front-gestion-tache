@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import  { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { validateEmail } from '../Utiles';
+import { AuthContext } from './AuthProvider';
 
 const PasswordErrorMessage = () => {
   return <p className="FieldError">Password should have at least 8 characters</p>;
@@ -20,9 +21,11 @@ const Login = () => {
     password: ''
   });
   const [loginError, setLoginError] = useState('');
+  const { login } = useContext(AuthContext);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setLoginError(''); // Clear login error when user starts typing
   };
 
   const handleSubmit = async (e) => {
@@ -30,12 +33,15 @@ const Login = () => {
 
     try {
       const response = await axios.post('http://localhost:4200/api/v1/login', formData);
+      const jwtToken = "fake-jwt-token";
+      login(jwtToken);
 
       if (response.status === 200) {
         const data = response.data;
-        localStorage.setItem('isLoggedIn', true);
+        console.log(data);
+        login(response.data.token)
         localStorage.setItem('userRole', data.role);
-        window.location.href = '/'; // Redirection vers la page d'accueil après la connexion
+        window.location.href = '/'; // Redirect to home page after successful login
       } else {
         console.error('Failed to login');
       }
@@ -49,6 +55,13 @@ const Login = () => {
       }
     }
   };
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn) {
+      window.location.href = '/'; // Redirect to home page if user is logged in
+    }
+  }, []);
 
   const getIsFormValid = () => {
     return validateEmail(formData.email) && formData.password.length >= 8;
@@ -85,7 +98,7 @@ const Login = () => {
           {formData.password.length < 8 && <PasswordErrorMessage />}
           <button type="submit" disabled={!getIsFormValid()}>Login</button>
         </form>
-        <p>Don't have an account? Click <a href="/register">here</a> to register</p>
+        <p>Dont have an account? Click <a href="/register">here</a> to register</p>
       </div>
     </div>
   );

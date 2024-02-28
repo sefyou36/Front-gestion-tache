@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { Navigate } from 'react-router-dom';
+import { AuthContext } from '../../auth/AuthProvider';
 
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
@@ -100,6 +102,11 @@ const Dashboard = () => {
       console.error('Error deleting user:', error);
     }
   };
+  const { isLoggedIn } = useContext(AuthContext);
+
+  if (!isLoggedIn) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div>
@@ -149,6 +156,6 @@ const Dashboard = () => {
       )}
     </div>
   );
-};
+}; 
 
 export default Dashboard;

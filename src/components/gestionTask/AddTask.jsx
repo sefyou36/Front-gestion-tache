@@ -1,5 +1,6 @@
-import { useState } from "react"
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react"
+import { Link, Navigate } from "react-router-dom";
+import { AuthContext } from "../../auth/AuthProvider";
 const AddTask = ()=>{
     const [tasks, setTasks] = useState([]);
     const [newTask,setNewTask] = useState("")
@@ -26,7 +27,11 @@ const AddTask = ()=>{
         setTasks([...tasks, data]);
         setNewTask("");
     }
-    
+    const { isLoggedIn } = useContext(AuthContext);
+
+    if (!isLoggedIn) {
+      return <Navigate to="/" />;
+    }
     return (
 
         <>

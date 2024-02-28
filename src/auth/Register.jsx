@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios"; // Import Axios library
+import axios from "axios";
 import { validateEmail } from "../Utiles";
 
 const PasswordErrorMessage = () => {
@@ -20,10 +20,6 @@ const Register = () => {
   });
   const [emailExists, setEmailExists] = useState(false);
 
-  const getIsFormValid = () => {
-    return firstName && validateEmail(email) && password.value.length >= 8;
-  };
-
   const clearForm = () => {
     setFirstName("");
     setLastName("");
@@ -32,7 +28,7 @@ const Register = () => {
       value: "",
       isTouched: false,
     });
-    setEmailExists("")
+    setEmailExists(false);
   };
 
   const handleSubmit = (e) => {
@@ -59,6 +55,10 @@ const Register = () => {
           console.error('Error creating account:', error);
         }
       });
+  };
+
+  const getIsFormValid = () => {
+    return firstName && validateEmail(email) && password.value.length >= 8;
   };
 
   return (
