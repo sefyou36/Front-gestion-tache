@@ -22,8 +22,8 @@ const Home = () => {
         <div>
           <h1>Welcome to the Home Page</h1>
           <ShowTask />
-          <Link to="/addTask">Add a Task</Link>
-          <button className="bg-red-500" onClick={logout}>Logout</button>
+          <Link className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mr-2" to="/addTask">Add a Task</Link>
+          <button className="bg-red-500" onClick={logout}></button>
         </div>
       ) : (
         <p>Please login to access more features.</p>

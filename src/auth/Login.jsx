@@ -1,4 +1,4 @@
-import  { useState, useEffect, useContext } from 'react';
+import  { useState, useContext } from 'react';
 import axios from 'axios';
 import { validateEmail } from '../Utiles';
 import { AuthContext } from './AuthProvider';
@@ -56,12 +56,12 @@ const Login = () => {
     }
   };
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (isLoggedIn) {
-      window.location.href = '/'; // Redirect to home page if user is logged in
-    }
-  }, []);
+  // useEffect(() => {
+  //   const isLoggedIn = localStorage.getItem('isLoggedIn');
+  //   if (isLoggedIn) {
+  //     window.location.href = '/'; // Redirect to home page if user is logged in
+  //   }
+  // }, []);
 
   const getIsFormValid = () => {
     return validateEmail(formData.email) && formData.password.length >= 8;

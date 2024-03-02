@@ -1,6 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../auth/AuthProvider';
+import { validateEmail } from '../../Utiles';
+import axios from 'axios';
+
+const EmailExistsAlert = () => {
+  return <p className="FieldError">Email already exists</p>;
+};
 
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
@@ -8,14 +14,29 @@ const Dashboard = () => {
     lastName: '',
     firstName: '',
     email: '',
-    password: ''
+    password: {
+      value: '',
+      isTouched: false,
+    },
   });
+  const [emailExists, setEmailExists] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [isUpdatePopupOpen, setIsUpdatePopupOpen] = useState(false);
 
-  useEffect(() => {
-    fetchAllUsers();
-  }, []);
+  const { isLoggedIn } = useContext(AuthContext);
+
+  const clearForm = () => {
+    setFormData({
+      lastName: '',
+      firstName: '',
+      email: '',
+      password: {
+        value: '',
+        isTouched: false,
+      },
+    });
+    setEmailExists(false);
+  };
 
   const fetchAllUsers = async () => {
     try {
@@ -31,21 +52,50 @@ const Dashboard = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleCreateUser = async () => {
-    try {
-      const response = await fetch('http://localhost:4200/api/v1/user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-      const data = await response.json();
-      fetchAllUsers();
-    } catch (error) {
-      console.error('Error creating user:', error);
-    }
+  const handlePasswordChange = (e) => {
+    setFormData({
+      ...formData,
+      password: {
+        ...formData.password,
+        value: e.target.value,
+        isTouched: true,
+      },
+    });
   };
+
+  const handleCreateUser = (e) => {
+    e.preventDefault();
+
+    const formDataObj = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password.value,
+    };
+
+    axios.post("http://localhost:4200/api/v1/register", formDataObj)
+      .then(()=> {
+        // Handle success
+        alert("Account created!");
+        clearForm();
+      })
+      .catch(error => {
+        // Handle error
+        if (error.response && error.response.status === 400) {
+          setEmailExists(true);
+        } else {
+          console.error('Error creating account:', error);
+        }
+      });
+  };
+
+  const getIsFormValid = () => {
+    return formData.firstName && validateEmail(formData.email) && formData.password.value.length >= 8;
+  };
+
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
 
   const handleOpenUpdatePopup = (userId) => {
     const userToUpdate = users.find(user => user._id === userId);
@@ -53,7 +103,7 @@ const Dashboard = () => {
       lastName: userToUpdate.lastName,
       firstName: userToUpdate.firstName,
       email: userToUpdate.email,
-      password: '' // Vous pouvez choisir de ne pas mettre à jour le mot de passe dans le formulaire de mise à jour
+      password: '',
     });
     setSelectedUserId(userId);
     setIsUpdatePopupOpen(true);
@@ -66,7 +116,7 @@ const Dashboard = () => {
       lastName: '',
       firstName: '',
       email: '',
-      password: ''
+      password: '',
     });
   };
 
@@ -75,9 +125,9 @@ const Dashboard = () => {
       const response = await fetch(`http://localhost:4200/api/v1/user/${selectedUserId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/``` json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -102,7 +152,6 @@ const Dashboard = () => {
       console.error('Error deleting user:', error);
     }
   };
-  const { isLoggedIn } = useContext(AuthContext);
 
   if (!isLoggedIn) {
     return <Navigate to="/" />;
@@ -113,12 +162,13 @@ const Dashboard = () => {
       <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-2">Create New User</h3>
+        {emailExists && <EmailExistsAlert />}
         <div className="flex flex-col md:flex-row gap-4">
-          <input type="text" name="lastName" placeholder="Last Name" className="border p-2 rounded-md" onChange={handleChange} />
-          <input type="text" name="firstName" placeholder="First Name" className="border p-2 rounded-md" onChange={handleChange} />
-          <input type="email" name="email" placeholder="Email" className="border p-2 rounded-md" onChange={handleChange} />
-          <input type="password" name="password" placeholder="Password" className="border p-2 rounded-md" onChange={handleChange} />
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleCreateUser}>Create User</button>
+          <input type="text" name="lastName" placeholder="Last Name" className="border p-2 rounded-md" onChange={handleChange} value={formData.lastName} />
+          <input type="text" name="firstName" placeholder="First Name" className="border p-2 rounded-md" onChange={handleChange} value={formData.firstName} />
+          <input type="email" name="email" placeholder="Email" className="border p-2 rounded-md" onChange={handleChange} value={formData.email} />
+          <input type="password" name="password" placeholder="Password" className="border p-2 rounded-md" onChange={handlePasswordChange} value={formData.password.value} />
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleCreateUser} disabled={!getIsFormValid()}>Create User</button>
         </div>
       </div>
       <div>
@@ -138,24 +188,20 @@ const Dashboard = () => {
           ))}
         </ul>
       </div>
-      {/* Popup de mise à jour */}
       {isUpdatePopupOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold mb-4">Update User</h2>
             <input type="text" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} className="border p-2 rounded-md mb-2" />
             <input type="text" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} className="border p-2 rounded-md mb-2" />
-            <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="border p-2 rounded-md mb-2" />
-            <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} className="border p-2 rounded-md mb-4" />
-            <div className="flex justify-end">
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2" onClick={handleUpdateUser}>Update</button>
-              <button className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400" onClick={handleCloseUpdatePopup}>Cancel</button>
-            </div>
+            <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="border p-2 rounded``` md mb-2" />
+            <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2" onClick={handleUpdateUser}>Update</button>
+            <button className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400" onClick={handleCloseUpdatePopup}>Cancel</button>
           </div>
         </div>
       )}
     </div>
   );
-}; 
+};
 
 export default Dashboard;
