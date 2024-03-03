@@ -90,7 +90,7 @@ const Dashboard = () => {
   };
 
   const getIsFormValid = () => {
-    return formData.firstName && validateEmail(formData.email) && formData.password.value.length >= 8;
+    return formData.firstName && validateEmail(formData.email) && formData.password.value >= 8;
   };
 
   useEffect(() => {
@@ -120,24 +120,29 @@ const Dashboard = () => {
     });
   };
 
-  const handleUpdateUser = async () => {
-    try {
-      const response = await fetch(`http://localhost:4200/api/v1/user/${selectedUserId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/``` json'
-        },
-        body: JSON.stringify(formData),
-      });
+ const handleUpdateUser = async () => {
+  try {
+    const response = await fetch(`http://localhost:4200/api/v1/user/${selectedUserId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        lastName: formData.lastName,
+        firstName: formData.firstName,
+        email: formData.email,
+        password: formData.password.value,
+      })
+    });
 
-      if (response.ok) {
-        fetchAllUsers();
-        handleCloseUpdatePopup();
-      }
-    } catch (error) {
-      console.error('Error updating user:', error);
+    if (response.ok) {
+      fetchAllUsers();
+      handleCloseUpdatePopup();
     }
-  };
+  } catch (error) {
+    console.error('Error updating user:', error);
+  }
+};
 
   const handleDeleteUser = async (id) => {
     try {
@@ -168,7 +173,7 @@ const Dashboard = () => {
           <input type="text" name="firstName" placeholder="First Name" className="border p-2 rounded-md" onChange={handleChange} value={formData.firstName} />
           <input type="email" name="email" placeholder="Email" className="border p-2 rounded-md" onChange={handleChange} value={formData.email} />
           <input type="password" name="password" placeholder="Password" className="border p-2 rounded-md" onChange={handlePasswordChange} value={formData.password.value} />
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleCreateUser} disabled={!getIsFormValid()}>Create User</button>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleCreateUser} >Create User</button>
         </div>
       </div>
       <div>
